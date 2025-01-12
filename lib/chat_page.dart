@@ -27,51 +27,44 @@ class _ChatPageState extends State<ChatPage> {
     id: '2',
   );
 
-  Future<void> chatWs() async {
-    await channel.ready;
-    channel.stream.listen(
-      (message) {
-        addMessage(
-          types.TextMessage(
-            author: _channel,
-            id: Random().nextInt(10000).toString(),
-            text: message,
-          ),
-        );
-      },
-    );
-  }
-
-  void addMessage(types.Message message) {
-    setState(() {
-      _messages.insert(0, message);
-    });
-  }
-
   List<types.Message> _messages = [];
-
-  @override
-  void initState() {
-    super.initState();
-    chatWs();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Chat(
-        messages: _messages,
-        onSendPressed: (val) {
-          channel.sink.add(val.text);
-          addMessage(
-            types.TextMessage(
-              author: _user,
-              id: Random().nextInt(10000).toString(),
-              text: val.text,
-            ),
+      body: StreamBuilder<dynamic>(
+        stream: channel.stream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            _messages.insert(
+              0,
+              types.TextMessage(
+                author: _channel,
+                id: Random().nextInt(10000).toString(),
+                text: snapshot.data.toString(),
+              ),
+            );
+            return Chat(
+              showUserAvatars: true,
+              messages: _messages,
+              onSendPressed: (val) {
+                channel.sink.add(val.text);
+                _messages.insert(
+                  0,
+                  types.TextMessage(
+                    author: _user,
+                    id: Random().nextInt(10000).toString(),
+                    text: val.text,
+                  ),
+                );
+              },
+              user: _user,
+            );
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
           );
         },
-        user: _user,
       ),
     );
   }
