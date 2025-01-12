@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -17,11 +19,25 @@ class _ChatPageState extends State<ChatPage> {
     ),
   );
 
+  final _user = const types.User(
+    id: '1',
+  );
+
+  final _channel = const types.User(
+    id: '2',
+  );
+
   Future<void> chatWs() async {
     await channel.ready;
     channel.stream.listen(
       (message) {
-        print(message);
+        addMessage(
+          types.TextMessage(
+            author: _channel,
+            id: Random().nextInt(10000).toString(),
+            text: message,
+          ),
+        );
       },
     );
   }
@@ -36,8 +52,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void initState() {
-    chatWs();
     super.initState();
+    chatWs();
   }
 
   @override
@@ -49,15 +65,13 @@ class _ChatPageState extends State<ChatPage> {
           channel.sink.add(val.text);
           addMessage(
             types.TextMessage(
-              author: const types.User(
-                id: '',
-              ),
-              id: '',
+              author: _user,
+              id: Random().nextInt(10000).toString(),
               text: val.text,
             ),
           );
         },
-        user: const types.User(id: ''),
+        user: _user,
       ),
     );
   }
