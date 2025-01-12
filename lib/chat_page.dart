@@ -46,13 +46,14 @@ class _ChatPageState extends State<ChatPage> {
       body: Chat(
         messages: _messages,
         onSendPressed: (val) {
+          channel.sink.add(val.text);
           addMessage(
-            const types.TextMessage(
-              author: types.User(
+            types.TextMessage(
+              author: const types.User(
                 id: '',
               ),
               id: '',
-              text: 'data',
+              text: val.text,
             ),
           );
         },
